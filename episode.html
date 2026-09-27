@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Episode Detail | CineFlix</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --bg-soft: #15151b;
+        --panel: rgba(20, 20, 27, 0.94);
+        --white: #f5f5f5;
+        --muted: #b9b9c2;
+        --line: rgba(255,255,255,0.08);
+        --red: #e50914;
+        --red-dark: #b20710;
+        --good: #46d369;
+        --shadow: 0 24px 52px rgba(0,0,0,0.45);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--white);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      a { color: inherit; text-decoration: none; }
+      img { display: block; max-width: 100%; }
+      button, input { font: inherit; }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: rgba(11, 11, 15, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .container { width: min(1220px, calc(100% - 40px)); margin: 0 auto; }
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 18px 0;
+      }
+      .brand {
+        color: var(--red);
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+      .nav {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .nav a:hover { color: var(--white); }
+
+      .hero {
+        position: relative;
+        min-height: 630px;
+        background: linear-gradient(90deg, rgba(0,0,0,0.82), rgba(0,0,0,0.42), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(11,11,15,0.1), rgba(11,11,15,1));
+      }
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        width: min(780px, 100%);
+        padding: 90px 0 64px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--red);
+        box-shadow: 0 0 15px rgba(229, 9, 20, 0.8);
+      }
+      h1 {
+        margin: 18px 0 14px;
+        font-size: clamp(3rem, 5vw, 5.7rem);
+        line-height: 0.92;
+        letter-spacing: -2px;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 16px;
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 18px;
+      }
+      .score { color: var(--good); font-weight: 700; }
+      .description {
+        max-width: 700px;
+        color: rgba(255,255,255,0.82);
+        line-height: 1.75;
+        font-size: 1.04rem;
+        margin-bottom: 26px;
+      }
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 22px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-primary {
+        background: var(--red);
+        color: var(--white);
+      }
+      .btn-primary:hover { background: var(--red-dark); }
+      .btn-secondary {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.12);
+        color: var(--white);
+      }
+
+      .main {
+        padding: 32px 0 72px;
+      }
+      .player-shell {
+        position: relative;
+        display: grid;
+        gap: 26px;
+        grid-template-columns: 1.5fr 0.7fr;
+        align-items: start;
+      }
+      .video-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 26px;
+        border: 1px solid var(--line);
+        background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        box-shadow: var(--shadow);
+      }
+      .video-poster {
+        position: relative;
+        height: 420px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+      }
+      .video-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.78));
+      }
+      .video-topbar {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        right: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 2;
+      }
+      .video-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .video-badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--red);
+      }
+      .play-button {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        width: 86px;
+        height: 86px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.28);
+        background: rgba(229, 9, 20, 0.72);
+        color: var(--white);
+        font-size: 2rem;
+        box-shadow: 0 18px 36px rgba(229, 9, 20, 0.28);
+        cursor: pointer;
+      }
+      .video-controls {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+        z-index: 2;
+      }
+      .seekbar {
+        position: relative;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.18);
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+      .seekbar-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 38%;
+        background: linear-gradient(90deg, #ff4d5a, var(--red));
+      }
+      .controls-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--white);
+      }
+      .left-controls, .right-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .control-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.06);
+        color: var(--white);
+        cursor: pointer;
+      }
+      .timecode {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.8);
+      }
+
+      .side-panel {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+      }
+      .side-panel h3 {
+        margin: 0 0 18px;
+        font-size: 1.3rem;
+      }
+      .episode-list {
+        display: grid;
+        gap: 12px;
+      }
+      .episode-item {
+        display: grid;
+        grid-template-columns: 52px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.02);
+        color: var(--white);
+        text-align: left;
+        cursor: pointer;
+      }
+      .episode-item.active {
+        background: rgba(229, 9, 20, 0.12);
+        border-color: rgba(229, 9, 20, 0.48);
+      }
+      .episode-no {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        font-weight: 700;
+      }
+      .episode-text strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .episode-text span {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+      .episode-time {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .detail-card {
+        margin-top: 28px;
+        padding: 22px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+      }
+      .detail-card h2 {
+        margin: 0 0 14px;
+        font-size: 1.5rem;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+        gap: 14px 20px;
+        color: var(--muted);
+      }
+      .detail-grid strong {
+        display: block;
+        color: var(--white);
+        margin-top: 6px;
+      }
+      .detail-overview {
+        margin-top: 18px;
+        color: rgba(255,255,255,0.8);
+        line-height: 1.75;
+      }
+
+      @media (max-width: 980px) {
+        .nav { display: none; }
+        .player-shell { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 640px) {
+        .video-poster { height: 320px; }
+        .brand { font-size: 1.5rem; }
+        .detail-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="index.html" class="brand">CINEFLIX</a>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a href="index.html">Home</a>
+          <a href="movies.html">Movies</a>
+          <a href="series.html">TV Series</a>
+          <a href="genre.html">Genres</a>
+          <a href="watchlist.html">My List</a>
+          <a href="profile.html">Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container hero-content">
+        <div class="badge">Original Series</div>
+        <h1>Crimson Horizon</h1>
+        <div class="meta">
+          <span class="score">9.7</span>
+          <span>2026</span>
+          <span>Drama • Sci‑Fi</span>
+          <span>8 Episodes</span>
+        </div>
+        <p class="description">
+          Dalam dunia yang kehilangan cahaya, seorang pilot harus memilih antara membela planetnya atau mengikuti jalur pemberontakan yang mengancam masa depan semua manusia. Serial ini menghadirkan aksi, drama mendalam, dan visual sinematik yang sangat kuat.
+        </p>
+        <div class="cta">
+          <button class="btn btn-primary" type="button">▶ Play Episode</button>
+          <button class="btn btn-secondary watchlist-toggle" type="button" data-title="Crimson Horizon">＋ My List</button>
+        </div>
+      </div>
+    </section>
+
+    <main class="main">
+      <div class="container player-shell">
+        <div class="video-card">
+          <div class="video-poster">
+            <div class="video-overlay"></div>
+            <div class="video-topbar">
+              <div class="video-badge">Episode 1</div>
+              <div class="timecode">42:18 / 46:00</div>
+            </div>
+            <button class="play-button" aria-label="Play episode">▶</button>
+            <div class="video-controls">
+              <div class="seekbar"><span class="seekbar-fill"></span></div>
+              <div class="controls-row">
+                <div class="left-controls">
+                  <button class="control-btn" aria-label="Pause">⏸</button>
+                  <button class="control-btn" aria-label="Back 10">⏪</button>
+                  <button class="control-btn" aria-label="Forward 10">⏩</button>
+                </div>
+                <div class="right-controls">
+                  <button class="control-btn" aria-label="Volume">🔊</button>
+                  <button class="control-btn" aria-label="Subtitles">CC</button>
+                  <button class="control-btn" aria-label="Settings">⚙</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side-panel">
+          <h3>Episodes</h3>
+          <div class="episode-list">
+            <button class="episode-item active" type="button" data-title="Episode 1 - The Last Signal" data-runtime="46 min" data-summary="Seorang astronaut yang pulang untuk terakhir kalinya menemukan pola misterius di orbit bumi.">
+              <span class="episode-no">01</span>
+              <span class="episode-text">
+                <strong>The Last Signal</strong>
+                <span>Opening arc</span>
+              </span>
+              <span class="episode-time">46 min</span>
+            </button>
+            <button class="episode-item" type="button" data-title="Episode 2 - City Without Light" data-runtime="51 min" data-summary="Saat listrik nasional padam, dua sahabat harus merumuskan keputusan hidup dan mati dalam kota yang gelap.">
+              <span class="episode-no">02</span>
+              <span class="episode-text">
+                <strong>City Without Light</strong>
+                <span>Power collapse</span>
+              </span>
+              <span class="episode-time">51 min</span>
+            </button>
+            <button class="episode-item" type="button" data-title="Episode 3 - Steel Storm" data-runtime="49 min" data-summary="Pasukan pendukung kota harus bertahan dalam badai logam yang menyerang dari langit.">
+              <span class="episode-no">03</span>
+              <span class="episode-text">
+                <strong>Steel Storm</strong>
+                <span>Battle night</span>
+              </span>
+              <span class="episode-time">49 min</span>
+            </button>
+            <button class="episode-item" type="button" data-title="Episode 4 - Signal Echo" data-runtime="52 min" data-summary="Misteri sinyal yang berulang membawa halaman baru dalam perjuangan pilot dan pasukannya.">
+              <span class="episode-no">04</span>
+              <span class="episode-text">
+                <strong>Signal Echo</strong>
+                <span>Unanswered call</span>
+              </span>
+              <span class="episode-time">52 min</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="container">
+        <div class="detail-card">
+          <h2>Episode Overview</h2>
+          <div class="detail-grid">
+            <div>
+              <span>Title</span>
+              <strong id="detailTitle">Episode 1 - The Last Signal</strong>
+            </div>
+            <div>
+              <span>Duration</span>
+              <strong id="detailRuntime">46 min</strong>
+            </div>
+            <div>
+              <span>Rating</span>
+              <strong>9.7 / 10</strong>
+            </div>
+            <div>
+              <span>Release</span>
+              <strong>05 Oct 2026</strong>
+            </div>
+          </div>
+          <p class="detail-overview" id="detailSummary">
+            Seorang astronaut yang pulang untuk terakhir kalinya menemukan pola misterius di orbit bumi.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const WATCHLIST_KEY = 'cinemaverse_watchlist';
+      const HISTORY_KEY = 'cinemaverse_history';
+      const CONTINUE_KEY = 'cinemaverse_continue';
+
+      const watchlistButton = document.querySelector('.watchlist-toggle');
+      const watchlistDataTitle = watchlistButton ? watchlistButton.dataset.title : '';
+      const episodeButtons = document.querySelectorAll('.episode-item');
+      const detailTitle = document.getElementById('detailTitle');
+      const detailRuntime = document.getElementById('detailRuntime');
+      const detailSummary = document.getElementById('detailSummary');
+
+      function getWatchlist() {
+        try {
+          return JSON.parse(localStorage.getItem(WATCHLIST_KEY) || '[]');
+        } catch {
+          return [];
+        }
+      }
+
+      function syncWatchlistButton() {
+        if (!watchlistButton) return;
+        const exists = getWatchlist().some((item) => item.title === watchlistDataTitle);
+        watchlistButton.textContent = exists ? '✓ Added to My List' : '＋ My List';
+        watchlistButton.style.background = exists ? 'rgba(70, 211, 105, 0.12)' : 'rgba(255,255,255,0.08)';
+        watchlistButton.style.borderColor = exists ? 'rgba(70, 211, 105, 0.6)' : 'rgba(255,255,255,0.12)';
+      }
+
+      function saveHistory(title, summary) {
+        const items = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        const next = [
+          { title, summary, time: new Date().toISOString() },
+          ...items.filter((i) => i.title !== title)
+        ].slice(0, 6);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      }
+
+      function saveContinue(title, progress = 38) {
+        const value = {
+          title,
+          progress,
+          updatedAt: new Date().toISOString()
+        };
+        const items = JSON.parse(localStorage.getItem(CONTINUE_KEY) || '[]');
+        localStorage.setItem(CONTINUE_KEY, JSON.stringify([
+          value,
+          ...items.filter((i) => i.title !== title)
+        ].slice(0, 4)));
+      }
+
+      watchlistButton?.addEventListener('click', () => {
+        const items = getWatchlist();
+        const exists = items.some((item) => item.title === watchlistDataTitle);
+        const next = exists
+          ? items.filter((item) => item.title !== watchlistDataTitle)
+          : [...items, { title: watchlistDataTitle, addedAt: new Date().toISOString() }];
+        localStorage.setItem(WATCHLIST_KEY, JSON.stringify(next));
+        syncWatchlistButton();
+      });
+
+      episodeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          episodeButtons.forEach((item) => item.classList.toggle('active', item === button));
+          const title = button.dataset.title;
+          const runtime = button.dataset.runtime;
+          const summary = button.dataset.summary;
+
+          detailTitle.textContent = title;
+          detailRuntime.textContent = runtime;
+          detailSummary.textContent = summary;
+          document.querySelector('.video-badge').textContent = title.split(' - ')[0];
+          document.querySelector('.timecode').textContent = '42:18 / ' + runtime.replace(' min', ':00');
+
+          saveHistory(title, summary);
+          saveContinue(title, 42);
+        });
+      });
+
+      syncWatchlistButton();
+      saveHistory('Episode 1 - The Last Signal', 'Seorang astronaut yang pulang untuk terakhir kalinya menemukan pola misterius di orbit bumi.');
+      saveContinue('Crimson Horizon', 38);
+    </script>
+  </body>
+</html>

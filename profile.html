@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | CineFlix</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --panel: #17171d;
+        --panel-2: #111116;
+        --white: #f5f5f5;
+        --muted: #b7b7bf;
+        --line: rgba(255,255,255,0.08);
+        --red: #e50914;
+        --red-soft: rgba(229, 9, 20, 0.14);
+        --good: #46d369;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, rgba(229,9,20,0.14), transparent 28%), var(--bg);
+        color: var(--white);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      a { color: inherit; text-decoration: none; }
+      img { display: block; max-width: 100%; }
+      button { font: inherit; }
+      .container { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(11,11,15,0.88);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(12px);
+      }
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+      }
+      .brand {
+        color: var(--red);
+        font-size: 1.9rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+      .nav {
+        display: flex;
+        gap: 20px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .nav a:hover { color: var(--white); }
+
+      .page { padding: 36px 0 80px; }
+      .profile-wrap {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+      }
+      .card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 24px;
+      }
+      .panel {
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      }
+      .account-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(229,9,20,0.15), rgba(255,255,255,0.02));
+      }
+      .account-hero::before {
+        content: "";
+        position: absolute;
+        inset: -30% auto auto -15%;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(229,9,20,0.42), transparent 60%);
+      }
+      .avatar-box {
+        position: relative;
+        z-index: 1;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #f8d8b8, #d89d7a);
+        color: #121212;
+        font-size: 3rem;
+        font-weight: 900;
+        border: 2px solid rgba(255,255,255,0.12);
+        box-shadow: 0 18px 28px rgba(0,0,0,0.25);
+      }
+      .profile-name { text-align: center; font-size: 1.7rem; margin: 0; }
+      .profile-sub { text-align: center; color: var(--muted); margin-top: 8px; }
+      .info-list {
+        list-style: none;
+        margin: 22px 0 0;
+        padding: 0;
+        display: grid;
+        gap: 12px;
+      }
+      .info-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 10px;
+      }
+      .info-list strong { color: var(--white); }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .panel-header h2 {
+        margin: 0;
+        font-size: 1.7rem;
+      }
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(70, 211, 105, 0.14);
+        border: 1px solid rgba(70, 211, 105, 0.4);
+        color: #baf4c8;
+        font-size: 0.76rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .status-badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--good);
+        box-shadow: 0 0 10px rgba(70, 211, 105, 0.8);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .stat {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+      }
+      .stat .number { font-size: 1.8rem; font-weight: 900; color: var(--white); }
+      .stat .label { color: var(--muted); margin-top: 8px; }
+
+      .plans-grid, .settings-list, .history-grid {
+        display: grid;
+        gap: 16px;
+      }
+      .plans-grid {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        margin-top: 18px;
+      }
+      .plan-card {
+        position: relative;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.02);
+        padding: 18px;
+      }
+      .plan-card.active {
+        border-color: rgba(229, 9, 20, 0.6);
+        background: linear-gradient(180deg, rgba(229,9,20,0.08), rgba(255,255,255,0.02));
+      }
+      .plan-card small {
+        display: inline-block;
+        margin-bottom: 10px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .plan-card strong {
+        display: block;
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+      }
+      .plan-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .plan-card .tag {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--white);
+        border-radius: 999px;
+        padding: 5px 8px;
+        font-size: 0.7rem;
+      }
+
+      .settings-list {
+        margin-top: 10px;
+      }
+      .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--line);
+      }
+      .setting-row .label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .setting-row strong { font-size: 1rem; }
+      .setting-row span { color: var(--muted); font-size: 0.8rem; }
+      .toggle {
+        position: relative;
+        width: 48px;
+        height: 28px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.08);
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .toggle::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 4px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: white;
+        transition: transform 0.2s ease;
+      }
+      .toggle.on {
+        background: rgba(70, 211, 105, 0.25);
+        border-color: rgba(70, 211, 105, 0.5);
+      }
+      .toggle.on::after { transform: translateX(20px); }
+
+      .profile-switcher {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(140px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .profile-item {
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.02);
+        border-radius: 16px;
+        padding: 16px 12px;
+        text-align: left;
+        color: var(--white);
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      }
+      .profile-item.active {
+        border-color: rgba(229,9,20,0.5);
+        background: rgba(229,9,20,0.08);
+      }
+      .profile-item:hover { transform: translateY(-2px); }
+      .profile-item .mini-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      .profile-item strong { display: block; margin-bottom: 4px; }
+      .profile-item span { color: var(--muted); font-size: 0.8rem; }
+
+      .history-grid {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        margin-top: 18px;
+      }
+      .history-item {
+        overflow: hidden;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.02);
+      }
+      .history-item img {
+        width: 100%;
+        height: 170px;
+        object-fit: cover;
+      }
+      .history-item .body { padding: 12px 14px 14px; }
+      .history-item h3 { margin: 0 0 4px; font-size: 1rem; }
+      .history-item p { margin: 0; color: var(--muted); font-size: 0.8rem; }
+
+      .button-row {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.04);
+        color: var(--white);
+        font-weight: 700;
+      }
+      .btn.primary {
+        background: var(--red);
+        border-color: var(--red);
+      }
+
+      .continue-grid {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .continue-item {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 12px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.02);
+        overflow: hidden;
+      }
+      .continue-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .continue-body {
+        padding: 14px 12px 14px 0;
+      }
+      .continue-body h3 {
+        margin: 0 0 6px;
+        font-size: 1.05rem;
+      }
+      .continue-body p {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .progress-wrap {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        overflow: hidden;
+      }
+      .progress-fill {
+        display: block;
+        height: 100%;
+        width: 62%;
+        background: linear-gradient(90deg, #ff4d5a, var(--red));
+        border-radius: inherit;
+      }
+
+      @media (max-width: 820px) {
+        .profile-wrap { grid-template-columns: 1fr; }
+        .history-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+        .plans-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 540px) {
+        .nav { display: none; }
+        .stats, .history-grid, .profile-switcher { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="index.html" class="brand">CINEFLIX</a>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a href="index.html">Home</a>
+          <a href="series.html">Series</a>
+          <a href="movies.html">Movies</a>
+          <a href="watchlist.html">My List</a>
+          <a href="search.html">Search</a>
+          <a href="profile.html">Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container profile-wrap">
+        <aside class="card account-hero">
+          <div class="avatar-box" id="profileAvatar">N</div>
+          <h1 class="profile-name" id="profileName">Nadya</h1>
+          <div class="profile-sub" id="profileRole">Premium Member</div>
+          <ul class="info-list">
+            <li><span>Plan</span><strong id="profilePlan">4K Ultra HD</strong></li>
+            <li><span>Region</span><strong id="profileRegion">Indonesia</strong></li>
+            <li><span>Email</span><strong id="profileEmail">nadya@email.com</strong></li>
+            <li><span>Status</span><strong id="profileStatus">Active</strong></li>
+          </ul>
+        </aside>
+
+        <div class="profile-stack">
+          <section class="card panel">
+            <div class="panel-header">
+              <h2>My summary</h2>
+              <span class="status-badge">Active</span>
+            </div>
+            <div class="stats">
+              <div class="stat">
+                <div class="number">12</div>
+                <div class="label">Movies watched</div>
+              </div>
+              <div class="stat">
+                <div class="number">6</div>
+                <div class="label">Favorites</div>
+              </div>
+              <div class="stat">
+                <div class="number">24h</div>
+                <div class="label">Watch time</div>
+              </div>
+            </div>
+
+            <div class="button-row" style="margin-top:0; margin-bottom:24px;">
+              <a class="btn primary" href="watchlist.html">Open watchlist</a>
+              <a class="btn" href="index.html">Back home</a>
+            </div>
+
+            <h2>Continue Watching</h2>
+            <div class="continue-grid" id="continueGrid"></div>
+
+            <h2>Recent history</h2>
+            <div class="history-grid" id="historyGrid"></div>
+          </section>
+
+          <section class="card panel">
+            <div class="panel-header">
+              <h2>Subscription & plan</h2>
+              <span class="status-badge">Premium</span>
+            </div>
+            <div class="plans-grid">
+              <div class="plan-card active">
+                <small>Current</small>
+                <strong>Premium 4K</strong>
+                <p>UHD streaming, premium viewing, 4 profiles, full catalog access.</p>
+                <span class="tag">Active</span>
+              </div>
+              <div class="plan-card">
+                <small>Family</small>
+                <strong>Premium Family</strong>
+                <p>6 profiles, parental controls, more downloads, full cinema access.</p>
+                <span class="tag">Upgrade</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card panel">
+            <div class="panel-header">
+              <h2>Account settings</h2>
+            </div>
+            <div class="settings-list">
+              <div class="setting-row">
+                <div class="label">
+                  <strong>Auto download</strong>
+                  <span>Use mobile data for offline viewing</span>
+                </div>
+                <button class="toggle on" type="button" aria-label="Auto download" aria-pressed="true"></button>
+              </div>
+              <div class="setting-row">
+                <div class="label">
+                  <strong>Mature content</strong>
+                  <span>Special family controls</span>
+                </div>
+                <button class="toggle" type="button" aria-label="Mature content" aria-pressed="false"></button>
+              </div>
+              <div class="setting-row">
+                <div class="label">
+                  <strong>Cinematic mode</strong>
+                  <span>Optimize screen and audio</span>
+                </div>
+                <button class="toggle on" type="button" aria-label="Cinematic mode" aria-pressed="true"></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card panel">
+            <div class="panel-header">
+              <h2>Switch profile</h2>
+            </div>
+            <div class="profile-switcher">
+              <button class="profile-item active" type="button" data-name="Nadya" data-role="Premium Member" data-plan="4K Ultra HD" data-email="nadya@email.com" data-avatar="N" data-region="Indonesia">
+                <div class="mini-avatar" style="background: linear-gradient(135deg, #f8d8b8, #d89d7a); color: #121212;">N</div>
+                <strong>Nadya</strong>
+                <span>Premium</span>
+              </button>
+              <button class="profile-item" type="button" data-name="Alya" data-role="Family Profile" data-plan="Premium Family" data-email="alya@email.com" data-avatar="A" data-region="Indonesia">
+                <div class="mini-avatar" style="background: linear-gradient(135deg, #c4d7ff, #7eb6ff); color: #111;">A</div>
+                <strong>Alya</strong>
+                <span>Family</span>
+              </button>
+              <button class="profile-item" type="button" data-name="Rafi" data-role="Teen Profile" data-plan="Premium Basic" data-email="rafi@email.com" data-avatar="R" data-region="Singapore">
+                <div class="mini-avatar" style="background: linear-gradient(135deg, #d7f7c4, #7edc8e); color: #111;">R</div>
+                <strong>Rafi</strong>
+                <span>Teen</span>
+              </button>
+            </div>
+          </section>
+
+          <div class="button-row" style="padding: 0 8px;">
+            <a class="btn primary" href="index.html">Back to home</a>
+            <a class="btn" href="watchlist.html">Open watchlist</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const HISTORY_KEY = 'cinemaverse_history';
+      const CONTINUE_KEY = 'cinemaverse_continue';
+      const profileButtons = document.querySelectorAll('.profile-item');
+      const profileName = document.getElementById('profileName');
+      const profileRole = document.getElementById('profileRole');
+      const profilePlan = document.getElementById('profilePlan');
+      const profileEmail = document.getElementById('profileEmail');
+      const profileRegion = document.getElementById('profileRegion');
+      const profileAvatar = document.getElementById('profileAvatar');
+      const continueGrid = document.getElementById('continueGrid');
+      const historyGrid = document.getElementById('historyGrid');
+
+      const defaultContinue = [
+        {
+          title: 'Crimson Horizon',
+          subtitle: 'Episode 1 • 42% watched',
+          progress: 42,
+          image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80'
+        },
+        {
+          title: 'Midnight Run',
+          subtitle: 'Movie • 64% watched',
+          progress: 64,
+          image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80'
+        }
+      ];
+
+      const defaultHistory = [
+        { title: 'Crimson Horizon', date: '22 Nov 2026', image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80' },
+        { title: 'Skyfall', date: '18 Nov 2026', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80' },
+        { title: 'Midnight Run', date: '09 Nov 2026', image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80' }
+      ];
+
+      function safeParse(key, fallback) {
+        try {
+          const value = JSON.parse(localStorage.getItem(key) || 'null');
+          return value && Array.isArray(value) ? value : fallback;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function renderContinueWatching() {
+        const items = safeParse(CONTINUE_KEY, defaultContinue);
+        continueGrid.innerHTML = items.map((item) => `
+          <article class="continue-item">
+            <img src="${item.image}" alt="${item.title}" />
+            <div class="continue-body">
+              <h3>${item.title}</h3>
+              <p>${item.subtitle}</p>
+              <div class="progress-wrap"><span class="progress-fill" style="width:${item.progress}%"></span></div>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      function renderHistory() {
+        const items = safeParse(HISTORY_KEY, defaultHistory);
+        historyGrid.innerHTML = items.map((item) => `
+          <article class="history-item">
+            <img src="${item.image}" alt="${item.title}" />
+            <div class="body">
+              <h3>${item.title}</h3>
+              <p>${item.date || 'Recently watched'}</p>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      profileButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          profileButtons.forEach((item) => item.classList.toggle('active', item === button));
+          profileName.textContent = button.dataset.name;
+          profileRole.textContent = button.dataset.role;
+          profilePlan.textContent = button.dataset.plan;
+          profileEmail.textContent = button.dataset.email;
+          profileRegion.textContent = button.dataset.region;
+          profileAvatar.textContent = button.dataset.avatar;
+        });
+      });
+
+      document.querySelectorAll('.toggle').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('on');
+          toggle.setAttribute('aria-pressed', toggle.classList.contains('on'));
+        });
+      });
+
+      renderContinueWatching();
+      renderHistory();
+    </script>
+  </body>
+</html>

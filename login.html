@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masuk | CineFlix</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --bg-alt: #121218;
+        --panel: rgba(18, 18, 24, 0.9);
+        --panel-strong: #17171d;
+        --white: #f5f5f5;
+        --muted: #b7b7bf;
+        --line: rgba(255, 255, 255, 0.08);
+        --red: #e50914;
+        --red-2: #b20710;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4)),
+          url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--white);
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 20;
+        background: rgba(11, 11, 15, 0.75);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .container {
+        width: min(1200px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+      }
+
+      .brand {
+        margin: 0;
+        color: var(--red);
+        font-size: 2.1rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+
+      .nav {
+        display: flex;
+        gap: 22px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .nav a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .nav a:hover {
+        color: var(--white);
+      }
+
+      .auth-shell {
+        width: min(430px, calc(100% - 28px));
+        background: rgba(18, 18, 24, 0.88);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 34px 28px 26px;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      }
+
+      .page-wrap {
+        width: 100%;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding-top: 100px;
+      }
+
+      .brand-wrap {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+
+      .brand-wrap .brand {
+        display: inline-block;
+      }
+
+      .welcome {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+
+      .welcome h2 {
+        margin: 0 0 6px;
+        font-size: 1.8rem;
+      }
+
+      .welcome p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+
+      .tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .tab.active {
+        background: var(--red);
+        border-color: var(--red);
+        color: white;
+      }
+
+      .form-panel {
+        display: none;
+      }
+
+      .form-panel.active {
+        display: block;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 14px;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+
+      input {
+        width: 100%;
+        margin-top: 8px;
+        padding: 14px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        color: var(--white);
+        outline: none;
+      }
+
+      input:focus {
+        border-color: rgba(229,9,20,0.7);
+        box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.14);
+      }
+
+      .remember-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 12px 0 10px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .remember-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .remember-left input {
+        width: auto;
+        margin: 0;
+      }
+
+      .btn {
+        width: 100%;
+        margin-top: 10px;
+        padding: 14px 18px;
+        border: none;
+        border-radius: 10px;
+        background: var(--red);
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .btn:hover { background: var(--red-2); }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 18px 0 14px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
+      .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 8px;
+        padding: 12px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        color: var(--white);
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .helper {
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-align: center;
+      }
+
+      .helper a {
+        color: white;
+        text-decoration: none;
+      }
+
+      .back {
+        display: inline-block;
+        margin-top: 20px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="index.html" class="brand">NETFLIX</a>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a href="index.html">Beranda</a>
+          <a href="series.html">Series</a>
+          <a href="movies.html">Film</a>
+          <a href="genre.html">Genre</a>
+          <a href="watchlist.html">Watchlist</a>
+          <a href="search.html">Search</a>
+          <a href="subscription.html">Subscription</a>
+          <a href="profile.html">Profil</a>
+          <a href="admin.html">Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-wrap">
+      <div class="auth-shell">
+        <div class="brand-wrap">
+          <div class="brand">NETFLIX</div>
+        </div>
+
+        <div class="welcome">
+          <h2>Welcome Back</h2>
+          <p>Sign in to continue your watchlist</p>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-target="login">Masuk</button>
+          <button class="tab" data-target="register">Daftar</button>
+        </div>
+
+        <div class="form-panel active" id="login">
+          <form>
+            <label>
+              Email
+              <input type="email" placeholder="contoh@email.com" />
+            </label>
+            <label>
+              Password
+              <input type="password" placeholder="Masukkan password" />
+            </label>
+            <div class="remember-row">
+              <label class="remember-left">
+                <input type="checkbox" checked />
+                <span>Remember me</span>
+              </label>
+              <a href="#" style="color: var(--muted); text-decoration: none;">Forgot password?</a>
+            </div>
+            <button class="btn" type="submit">Masuk</button>
+          </form>
+
+          <div class="divider">Or</div>
+          <button class="social-btn" type="button">Continue with Google</button>
+        </div>
+
+        <div class="form-panel" id="register">
+          <form>
+            <label>
+              Nama Lengkap
+              <input type="text" placeholder="Nama Anda" />
+            </label>
+            <label>
+              Email
+              <input type="email" placeholder="contoh@email.com" />
+            </label>
+            <label>
+              Password
+              <input type="password" placeholder="Buat password" />
+            </label>
+            <label>
+              Confirm Password
+              <input type="password" placeholder="Ulangi password" />
+            </label>
+            <button class="btn" type="submit">Daftar</button>
+          </form>
+        </div>
+
+        <div class="helper">
+          <span>Belum punya akun?</span>
+          <a href="index.html">Kembali ke beranda</a>
+        </div>
+        <a class="back" href="index.html">← Kembali</a>
+      </div>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.form-panel');
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          tabs.forEach((btn) => btn.classList.toggle('active', btn === tab));
+          panels.forEach((panel) => {
+            panel.classList.toggle('active', panel.id === tab.dataset.target);
+          });
+        });
+      });
+
+      document.querySelectorAll('form').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+          event.preventDefault();
+
+          const panel = form.closest('.form-panel');
+          const nameInput = form.querySelector('input[type="text"]');
+          const emailInput = form.querySelector('input[type="email"]');
+          const passwordInput = form.querySelector('input[type="password"]');
+
+          const name = (nameInput && nameInput.value.trim()) || 'Nadya';
+          const email = (emailInput && emailInput.value.trim()) || 'nadya@email.com';
+          const password = (passwordInput && passwordInput.value.trim()) || 'password';
+
+          localStorage.setItem('cinemaverse_logged_in', 'true');
+          localStorage.setItem('cinemaverse_user', JSON.stringify({
+            name,
+            email,
+            password
+          }));
+
+          window.location.href = 'index.html';
+        });
+      });
+    </script>
+  </body>
+</html>

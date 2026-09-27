@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineFlix | Premium Streaming</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --bg-2: #14141a;
+        --panel: rgba(20, 20, 28, 0.9);
+        --white: #f5f5f5;
+        --muted: #b0b0b8;
+        --muted-2: #8c8c93;
+        --red: #e50914;
+        --red-2: #b20710;
+        --line: rgba(255, 255, 255, 0.08);
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        --good: #46d369;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top, rgba(229, 9, 20, 0.12), transparent 30%),
+          linear-gradient(180deg, #09090c 0%, #0b0b0f 18%, #0b0b0f 100%);
+        color: var(--white);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: radial-gradient(circle at center, black 30%, transparent 100%);
+        pointer-events: none;
+        opacity: 0.25;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .container {
+        width: min(1260px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: linear-gradient(to bottom, rgba(10, 10, 12, 0.9), rgba(10, 10, 12, 0.45));
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+      }
+
+      .brand {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--red);
+        letter-spacing: 1px;
+        text-shadow: 0 0 18px rgba(229, 9, 20, 0.4);
+      }
+
+      .nav {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .nav a {
+        position: relative;
+        transition: color 0.2s ease;
+      }
+
+      .nav a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -8px;
+        width: 100%;
+        height: 2px;
+        background: var(--red);
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 0.2s ease;
+      }
+
+      .nav a:hover,
+      .nav a:first-child {
+        color: var(--white);
+      }
+
+      .nav a:hover::after,
+      .nav a:first-child::after {
+        transform: scaleX(1);
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        position: relative;
+      }
+
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--white);
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+
+      .icon-btn:hover {
+        transform: translateY(-1px) scale(1.04);
+        box-shadow: 0 10px 22px rgba(229, 9, 20, 0.25);
+      }
+
+      .avatar {
+        background: linear-gradient(135deg, #f8d8b8, #d89d7a);
+        color: #1c1c1c;
+        font-weight: 800;
+      }
+
+      .account-panel {
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        width: min(280px, 80vw);
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(18, 18, 24, 0.96);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+        z-index: 40;
+      }
+
+      .account-panel[hidden] {
+        display: none;
+      }
+
+      .account-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 12px;
+      }
+
+      .account-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #f8d8b8, #d89d7a);
+        color: #111;
+        font-weight: 900;
+      }
+
+      .account-name {
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .account-sub {
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+
+      .account-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+
+      .account-list a,
+      .account-list button {
+        width: 100%;
+        text-align: left;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.02);
+        color: var(--white);
+        border-radius: 12px;
+        padding: 10px 12px;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .account-list a:hover,
+      .account-list button:hover {
+        background: rgba(229, 9, 20, 0.12);
+        border-color: rgba(229, 9, 20, 0.35);
+      }
+
+      .hero {
+        position: relative;
+        min-height: 720px;
+        overflow: hidden;
+        background: #07070a;
+      }
+
+      .hero-slider {
+        position: relative;
+        width: 100%;
+        min-height: 720px;
+        box-shadow: inset 0 -80px 100px rgba(0, 0, 0, 0.55);
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .slide.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.82));
+      }
+
+      .slide::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 10%, rgba(229, 9, 20, 0.18), transparent 20%), linear-gradient(180deg, rgba(11, 11, 15, 0.18), rgba(11, 11, 15, 0.82));
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        width: min(620px, 100%);
+        padding: 90px 0 120px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.72rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+
+      .badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--red);
+        box-shadow: 0 0 12px rgba(229, 9, 20, 0.8);
+      }
+
+      .hero h1 {
+        margin: 0 0 14px;
+        font-size: clamp(3rem, 5vw, 5.2rem);
+        line-height: 0.92;
+        letter-spacing: -2px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-bottom: 18px;
+      }
+
+      .meta .score {
+        color: var(--good);
+        font-weight: 700;
+      }
+
+      .description {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 28px;
+      }
+
+      .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px 24px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--red);
+        color: var(--white);
+      }
+
+      .btn-primary:hover {
+        background: var(--red-2);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.18);
+        color: var(--white);
+      }
+
+      .content {
+        padding: 18px 0 70px;
+      }
+
+      .slider-controls {
+        position: absolute;
+        right: 40px;
+        bottom: 36px;
+        z-index: 2;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .slider-arrow {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(0,0,0,0.2);
+        color: white;
+        cursor: pointer;
+        font-size: 1.2rem;
+      }
+
+      .slider-dots {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-left: 8px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.4);
+        border: none;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .dot.active {
+        background: var(--red);
+        box-shadow: 0 0 10px rgba(229, 9, 20, 0.8);
+      }
+
+      @keyframes cinematicIn {
+        0% {
+          opacity: 0;
+          transform: translateY(26px) scale(0.98);
+          filter: blur(6px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          filter: blur(0);
+        }
+      }
+
+      @keyframes floatGlow {
+        0%, 100% {
+          box-shadow: 0 0 0 rgba(229, 9, 20, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(229, 9, 20, 0.28);
+        }
+      }
+
+      .section,
+      .premium-banner,
+      .mini-banner,
+      .filter-bar,
+      .stack-strip {
+        opacity: 0;
+        transform: translateY(26px) scale(0.985);
+        animation: cinematicIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      .section:nth-of-type(2n) {
+        animation-delay: 0.06s;
+      }
+
+      .section:nth-of-type(3n) {
+        animation-delay: 0.12s;
+      }
+
+      .premium-banner { animation-delay: 0.08s; }
+      .mini-banner { animation-delay: 0.16s; }
+      .filter-bar { animation-delay: 0.18s; }
+      .stack-strip { animation-delay: 0.2s; }
+
+      .slide.active .hero-content {
+        animation: cinematicIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        padding-top: 8px;
+      }
+
+      .section-header h2 {
+        margin: 0;
+        font-size: 1.55rem;
+        letter-spacing: -0.04em;
+        font-weight: 800;
+      }
+
+      .explore {
+        color: var(--muted);
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .film-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(170px, 1fr));
+        gap: 16px;
+      }
+
+      .film-card {
+        position: relative;
+        height: 240px;
+        border-radius: 14px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: var(--shadow);
+        transform: translateY(0) scale(1);
+        transition: transform 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease;
+        animation: floatGlow 4s ease-in-out infinite;
+        background: rgba(255,255,255,0.02);
+      }
+
+      .film-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 22%, rgba(0,0,0,0.2) 100%);
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .film-card:hover,
+      .mini-card:hover,
+      .rank-card:hover,
+      .release-card:hover,
+      .watch-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 24px 55px rgba(0, 0, 0, 0.55);
+        filter: saturate(1.07);
+      }
+
+      .film-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card-overlay {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 14px 12px 12px;
+        background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.9));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: all 0.2s ease;
+        z-index: 2;
+      }
+
+      .film-card:hover .card-overlay,
+      .film-card.previewing .card-overlay {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .preview-badge {
+        display: inline-flex;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.18);
+      }
+
+      .preview-text {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .film-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.82));
+      }
+
+      .film-card .film-title {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 12px;
+        z-index: 1;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .mini-banner {
+        margin: 0 0 28px;
+        padding: 24px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      }
+
+      .mini-banner h3 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+
+      .mini-banner p {
+        margin: 0;
+        color: var(--white);
+        font-size: 1.7rem;
+        font-weight: 700;
+      }
+
+      .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 12px 0 28px;
+      }
+
+      .premium-banner {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .banner-feature {
+        position: relative;
+        min-height: 180px;
+        border-radius: 22px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.95), rgba(20, 20, 28, 0.75)), url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+        box-shadow: var(--shadow);
+        padding: 26px;
+        display: flex;
+        align-items: flex-end;
+      }
+
+      .banner-feature small {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .banner-feature h3 {
+        margin: 0;
+        font-size: clamp(1.8rem, 2.8vw, 3rem);
+      }
+
+      .banner-stat {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+        padding: 22px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+      }
+
+      .stat-box {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .stat-box strong {
+        display: block;
+        font-size: 1.6rem;
+        margin-bottom: 6px;
+      }
+
+      .stack-strip {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 12px;
+        margin: 14px 0 30px;
+      }
+
+      .stack-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 68px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+        color: var(--white);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      }
+
+      .filter-chip {
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
+        color: var(--white);
+        padding: 10px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 700;
+      }
+
+      .filter-chip.active,
+      .filter-chip:hover {
+        background: linear-gradient(135deg, rgba(229, 9, 20, 0.95), rgba(178, 7, 16, 0.9));
+        border-color: rgba(229, 9, 20, 0.8);
+        box-shadow: 0 12px 25px rgba(229, 9, 20, 0.24);
+      }
+
+      .featured-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .coming-soon {
+        margin: 10px 0 34px;
+      }
+
+      .coming-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(240px, 1fr));
+        gap: 18px;
+      }
+
+      .release-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        min-height: 260px;
+        box-shadow: var(--shadow);
+      }
+
+      .release-card img {
+        width: 100%;
+        height: 260px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .release-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.8));
+        display: flex;
+        align-items: flex-end;
+        padding: 18px;
+      }
+
+      .release-body {
+        width: 100%;
+      }
+
+      .release-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(229, 9, 20, 0.9);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      .release-title {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+
+      .release-meta {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .continue-wrap {
+        margin: 14px 0 30px;
+      }
+
+      .continue-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(260px, 1fr));
+        gap: 18px;
+      }
+
+      .horizontal-row {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding: 8px 4px 16px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.18) transparent;
+      }
+
+      .horizontal-row::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .horizontal-row::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.12);
+        border-radius: 999px;
+      }
+
+      .mini-card {
+        position: relative;
+        min-width: 200px;
+        height: 280px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease;
+      }
+
+      .mini-card:hover {
+        transform: translateY(-4px) scale(1.02);
+      }
+
+      .mini-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .mini-card .mini-label {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        font-weight: 700;
+        text-shadow: 0 5px 18px rgba(0,0,0,0.55);
+      }
+
+      .watch-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        min-height: 200px;
+        box-shadow: var(--shadow);
+      }
+
+      .watch-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .watch-body {
+        padding: 14px 14px 18px;
+      }
+
+      .watch-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .watch-title {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .watch-time {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .progress {
+        width: 100%;
+        height: 6px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ff4d5a, #e50914);
+      }
+
+      .top10-wrap {
+        margin-top: 10px;
+        margin-bottom: 26px;
+      }
+
+      .top10-row {
+        display: flex;
+        gap: 18px;
+        overflow-x: auto;
+        padding: 8px 4px 10px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.2) transparent;
+      }
+
+      .top10-row::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .top10-row::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 999px;
+      }
+
+      .rank-card {
+        position: relative;
+        min-width: 230px;
+        height: 150px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.04);
+        box-shadow: var(--shadow);
+      }
+
+      .rank-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.8);
+      }
+
+      .rank-no {
+        position: absolute;
+        left: 8px;
+        bottom: 6px;
+        font-size: 6rem;
+        font-weight: 900;
+        line-height: 1;
+        color: rgba(255,255,255,0.8);
+        -webkit-text-stroke: 2px rgba(255,255,255,0.25);
+        text-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      }
+
+      .rank-label {
+        position: absolute;
+        right: 12px;
+        bottom: 14px;
+        background: rgba(11,11,15,0.7);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        color: var(--white);
+      }
+
+      .featured-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        height: 220px;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+
+      .featured-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .featured-item .label {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 14px;
+        font-weight: 700;
+      }
+
+      .footer {
+        padding: 32px 0 56px;
+        color: var(--muted-2);
+        text-align: center;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(9, 9, 12, 0.84);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+      }
+
+      .modal.show {
+        display: flex;
+      }
+
+      .modal-panel {
+        position: relative;
+        width: min(860px, 100%);
+        background: linear-gradient(180deg, rgba(24, 24, 31, 0.98), rgba(11, 11, 15, 0.98));
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+        transform: translateY(20px) scale(0.96);
+        opacity: 0;
+        transition: transform 0.35s ease, opacity 0.35s ease;
+      }
+
+      .modal.show .modal-panel {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      .modal-image {
+        position: relative;
+        height: 320px;
+        background-size: cover;
+        background-position: center;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .modal-image iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      .modal-image::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.8));
+      }
+
+      .modal-body {
+        padding: 24px 28px 28px;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        z-index: 2;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.55);
+        color: white;
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .close-btn:hover {
+        transform: rotate(90deg) scale(1.08);
+        background: rgba(229, 9, 20, 0.9);
+      }
+
+      .movie-tag {
+        display: inline-block;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--muted);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        padding: 7px 10px;
+        border-radius: 999px;
+      }
+
+      .movie-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+
+      .movie-header h3 {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 2.7rem);
+      }
+
+      .meta-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 0.87rem;
+      }
+
+      .movie-desc {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+
+      .detail-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 980px) {
+        .nav {
+          display: none;
+        }
+
+        .film-grid {
+          grid-template-columns: repeat(3, minmax(150px, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero {
+          min-height: 620px;
+        }
+
+        .hero-content {
+          padding-top: 70px;
+        }
+
+        .film-grid {
+          grid-template-columns: repeat(2, minmax(140px, 1fr));
+        }
+
+        .brand {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <div class="brand">CINEFLIX</div>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a href="index.html">Home</a>
+          <a href="series.html">TV Series</a>
+          <a href="movies.html">Movies</a>
+          <a href="genre.html">Genres</a>
+          <a href="watchlist.html">My List</a>
+          <a href="search.html">Search</a>
+          <a href="subscription.html">Subscription</a>
+          <a href="profile.html">Profile</a>
+          <a href="admin.html">Admin</a>
+        </nav>
+        <div class="actions">
+          <a href="search.html" class="icon-btn" aria-label="Cari">⌕</a>
+          <a href="login.html" class="btn btn-secondary" id="authLink" style="padding: 10px 16px; min-height: 38px; border-radius: 999px;">Masuk</a>
+          <button class="icon-btn avatar" id="accountToggle" type="button" aria-label="Akun">N</button>
+          <div class="account-panel" id="accountPanel" hidden>
+            <div class="account-header">
+              <div class="account-avatar">N</div>
+              <div>
+                <p class="account-name">Nadya</p>
+                <div class="account-sub">Premium • 4K Ultra HD</div>
+              </div>
+            </div>
+            <ul class="account-list">
+              <li><a href="profile.html">Kelola profil</a></li>
+              <li><a href="watchlist.html">Watchlist saya</a></li>
+              <li><button type="button">Ubah langganan</button></li>
+              <li><button type="button">Pengaturan</button></li>
+              <li><button type="button" id="logoutBtn">Keluar</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-slider">
+          <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1800&q=80');">
+            <div class="container hero-content">
+              <div class="badge">Original</div>
+              <h1>Crimson Horizon</h1>
+              <div class="meta">
+                <span class="score">9.7</span>
+                <span>2026</span>
+                <span>Drama • Sci-Fi</span>
+                <span>2h 14m</span>
+              </div>
+              <p class="description">
+                Ketika dunia kehilangan cahaya yang tersisa, seorang pilot berbakat harus
+                memilih antara membela planetnya atau mengejar masa depan yang tak bisa dijamin.
+              </p>
+              <div class="cta">
+                <a class="btn btn-primary" href="detail.html?film=crimson-horizon">▶ Putar</a>
+                <button class="btn btn-secondary watchlist-toggle" type="button" data-title="Crimson Horizon">＋ Daftar Saya</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1800&q=80');">
+            <div class="container hero-content">
+              <div class="badge">New Release</div>
+              <h1>Nowhere City</h1>
+              <div class="meta">
+                <span class="score">8.9</span>
+                <span>2023</span>
+                <span>Drama • Urban</span>
+                <span>1h 56m</span>
+              </div>
+              <p class="description">
+                Dua sahabat menemukan bahwa masa depan mereka telah ditulis di tempat yang paling sulit dijangkau, di tengah kota yang tak pernah tidur.
+              </p>
+              <div class="cta">
+                <a class="btn btn-primary" href="detail.html?film=midnight-run">▶ Putar</a>
+                <a class="btn btn-secondary" href="login.html">＋ Daftar Saya</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1800&q=80');">
+            <div class="container hero-content">
+              <div class="badge">Top Pick</div>
+              <h1>Skyfall</h1>
+              <div class="meta">
+                <span class="score">9.1</span>
+                <span>2026</span>
+                <span>Adventure • Action</span>
+                <span>2h 11m</span>
+              </div>
+              <p class="description">
+                Di ketinggian awan, seorang pilot veteran harus memilih antara keselamatan dirinya dan misi terakhir yang bisa menyelamatkan semua orang.
+              </p>
+              <div class="cta">
+                <a class="btn btn-primary" href="detail.html?film=midnight-run">▶ Putar</a>
+                <a class="btn btn-secondary" href="login.html">＋ Daftar Saya</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="slider-controls">
+            <button class="slider-arrow" id="prevBtn" aria-label="Slide sebelumnya">&#10094;</button>
+            <button class="slider-arrow" id="nextBtn" aria-label="Slide berikutnya">&#10095;</button>
+            <div class="slider-dots" aria-label="Navigasi slide">
+              <button class="dot active" data-slide="0" aria-label="Slide 1"></button>
+              <button class="dot" data-slide="1" aria-label="Slide 2"></button>
+              <button class="dot" data-slide="2" aria-label="Slide 3"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="container content">
+        <div class="premium-banner">
+          <div class="banner-feature">
+            <div>
+              <small>Premiere tonight</small>
+              <h3>Crimson Horizon</h3>
+            </div>
+          </div>
+          <div class="banner-stat">
+            <div class="stat-box">
+              <strong>9.7</strong>
+              <span>Rating pengguna</span>
+            </div>
+            <div class="stat-box">
+              <strong>8</strong>
+              <span>Episode baru</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-banner">
+          <h3>Lintas genre</h3>
+          <p>Movie Night Picks</p>
+        </div>
+
+        <section class="section coming-soon" aria-label="Coming soon">
+          <div class="section-header">
+            <h2>Coming Soon</h2>
+            <span class="explore">Rilis minggu ini</span>
+          </div>
+          <div class="coming-row">
+            <article class="release-card" data-title="Obsidian Echo" data-year="2026" data-tag="Thriller" data-duration="1h 59m" data-description="Seorang jurnalis yang baru pulih dari tragedi besar harus membongkar kebenaran di balik sebuah stasiun radio yang ditutup secara misterius." data-trailer="ScMzIvxBSi4">
+              <img src="https://images.unsplash.com/photo-1524989941526-4a35bbd4b2c8?auto=format&fit=crop&w=900&q=80" alt="Obsidian Echo" />
+              <div class="release-overlay">
+                <div class="release-body">
+                  <div class="release-badge">New</div>
+                  <h3 class="release-title">Obsidian Echo</h3>
+                  <div class="release-meta">Thriller • 2026</div>
+                </div>
+              </div>
+            </article>
+            <article class="release-card" data-title="Solar Drift" data-year="2026" data-tag="Sci-Fi" data-duration="2h 08m" data-description="Dalam perjalanan antarplanet, sekelompok ekspedisi menemukan sinyal yang mengisyaratkan peradaban yang terhapus dari sejarah." data-trailer="ScMzIvxBSi4">
+              <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="Solar Drift" />
+              <div class="release-overlay">
+                <div class="release-body">
+                  <div class="release-badge">Trailers</div>
+                  <h3 class="release-title">Solar Drift</h3>
+                  <div class="release-meta">Sci-Fi • 2026</div>
+                </div>
+              </div>
+            </article>
+            <article class="release-card" data-title="Glass Kingdom" data-year="2026" data-tag="Drama" data-duration="2h 02m" data-description="Sebuah keluarga yang bertahan di metropolis mewah harus memutuskan apakah akan mempertahankan kekayaan atau kebebasan mereka." data-trailer="ScMzIvxBSi4">
+              <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80" alt="Glass Kingdom" />
+              <div class="release-overlay">
+                <div class="release-body">
+                  <div class="release-badge">Featured</div>
+                  <h3 class="release-title">Glass Kingdom</h3>
+                  <div class="release-meta">Drama • 2026</div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section continue-wrap" aria-label="Lanjutkan menonton">
+          <div class="section-header">
+            <h2>Lanjutkan menonton</h2>
+            <span class="explore">Baru ditonton</span>
+          </div>
+          <div class="continue-row">
+            <article class="watch-card">
+              <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80" alt="Crimson Horizon" />
+              <div class="watch-body">
+                <div class="watch-row">
+                  <h3 class="watch-title">Crimson Horizon</h3>
+                  <span class="watch-time">1h 12m</span>
+                </div>
+                <div class="progress"><span class="progress-fill" style="width: 72%;"></span></div>
+              </div>
+            </article>
+            <article class="watch-card">
+              <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80" alt="Skyfall" />
+              <div class="watch-body">
+                <div class="watch-row">
+                  <h3 class="watch-title">Skyfall</h3>
+                  <span class="watch-time">48m</span>
+                </div>
+                <div class="progress"><span class="progress-fill" style="width: 54%;"></span></div>
+              </div>
+            </article>
+            <article class="watch-card">
+              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" alt="Midnight Run" />
+              <div class="watch-body">
+                <div class="watch-row">
+                  <h3 class="watch-title">Midnight Run</h3>
+                  <span class="watch-time">35m</span>
+                </div>
+                <div class="progress"><span class="progress-fill" style="width: 38%;"></span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section top10-wrap" aria-label="Top 10 hari ini">
+          <div class="section-header">
+            <h2>Top 10 di Indonesia</h2>
+            <span class="explore">Lihat Semua</span>
+          </div>
+          <div class="top10-row" id="top10Row">
+            <div class="rank-card">
+              <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80" alt="Crimson Horizon" />
+              <div class="rank-no">1</div>
+              <div class="rank-label">Crimson Horizon</div>
+            </div>
+            <div class="rank-card">
+              <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80" alt="Skyfall" />
+              <div class="rank-no">2</div>
+              <div class="rank-label">Skyfall</div>
+            </div>
+            <div class="rank-card">
+              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" alt="Midnight Run" />
+              <div class="rank-no">3</div>
+              <div class="rank-label">Midnight Run</div>
+            </div>
+            <div class="rank-card">
+              <img src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=80" alt="Nowhere City" />
+              <div class="rank-no">4</div>
+              <div class="rank-label">Nowhere City</div>
+            </div>
+            <div class="rank-card">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80" alt="Steel Dawn" />
+              <div class="rank-no">5</div>
+              <div class="rank-label">Steel Dawn</div>
+            </div>
+            <div class="rank-card">
+              <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80" alt="Paper Stars" />
+              <div class="rank-no">6</div>
+              <div class="rank-label">Paper Stars</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="filter-bar" aria-label="Filter genre">
+          <button class="filter-chip active" data-filter="all" type="button">Semua</button>
+          <button class="filter-chip" data-filter="action" type="button">Action</button>
+          <button class="filter-chip" data-filter="drama" type="button">Drama</button>
+          <button class="filter-chip" data-filter="sci-fi" type="button">Sci-Fi</button>
+          <button class="filter-chip" data-filter="adventure" type="button">Adventure</button>
+          <button class="filter-chip" data-filter="thriller" type="button">Thriller</button>
+        </div>
+
+        <section class="stack-strip" aria-label="Teknologi stack">
+          <div class="stack-card">HTML5</div>
+          <div class="stack-card">CSS3</div>
+          <div class="stack-card">JavaScript</div>
+          <div class="stack-card">Python</div>
+          <div class="stack-card">C++</div>
+          <div class="stack-card">MySQL</div>
+        </section>
+
+        <section class="section" aria-label="Featured list horizontal">
+          <div class="section-header">
+            <h2>Featured List</h2>
+            <span class="explore">Lihat Semua</span>
+          </div>
+          <div class="horizontal-row">
+            <div class="mini-card">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80" alt="Steel Dawn" />
+              <div class="mini-label">Steel Dawn</div>
+            </div>
+            <div class="mini-card">
+              <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80" alt="Paper Stars" />
+              <div class="mini-label">Paper Stars</div>
+            </div>
+            <div class="mini-card">
+              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80" alt="Ghost Line" />
+              <div class="mini-label">Ghost Line</div>
+            </div>
+            <div class="mini-card">
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80" alt="Second Chance" />
+              <div class="mini-label">Second Chance</div>
+            </div>
+            <div class="mini-card">
+              <img src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&q=80" alt="Silent Bloom" />
+              <div class="mini-label">Silent Bloom</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" aria-label="Film paling populer">
+          <div class="section-header">
+            <h2>Terpopuler</h2>
+            <span class="explore">Lihat Semua</span>
+          </div>
+          <div class="film-grid">
+            <article class="film-card" data-title="Midnight Run" data-year="2026" data-tag="Action" data-duration="1h 52m" data-image="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" data-description="Seorang detektif kota yang merasa hidupnya sudah berakhir harus menjalani pelarian menegangkan melawan pihak yang ingin menutup mulutnya.">
+              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" alt="Midnight Run" />
+              <div class="film-title">Midnight Run</div>
+            </article>
+            <article class="film-card" data-title="Iron Breaker" data-year="2025" data-tag="Sci-Fi" data-duration="2h 06m" data-image="https://images.unsplash.com/photo-1524989941526-4a35bbd4b2c8?auto=format&fit=crop&w=900&q=80" data-description="Dalam dunia yang penuh mesin raksasa, seorang mekanik muda menemukan kunci untuk membalikkan kehancuran yang menimpa seluruh kota.">
+              <img src="https://images.unsplash.com/photo-1524989941526-4a35bbd4b2c8?auto=format&fit=crop&w=900&q=80" alt="Iron Breaker" />
+              <div class="film-title">Iron Breaker</div>
+            </article>
+            <article class="film-card" data-title="Zero Hour" data-year="2024" data-tag="Thriller" data-duration="1h 48m" data-image="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" data-description="Saat jam digital berhenti berdetak, seorang reporter harus memecahkan misteri besar yang mengancam masa depan manusia.">
+              <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" alt="Zero Hour" />
+              <div class="film-title">Zero Hour</div>
+            </article>
+            <article class="film-card" data-title="Skyfall" data-year="2026" data-tag="Adventure" data-duration="2h 11m" data-image="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80" data-description="Kisah penerbangan berdarah di awan tinggi, ketika pilot veteran harus memilih antara hidupnya dan misi terakhirnya.">
+              <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80" alt="Skyfall" />
+              <div class="film-title">Skyfall</div>
+            </article>
+            <article class="film-card" data-title="Nowhere City" data-year="2023" data-tag="Drama" data-duration="1h 56m" data-image="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=80" data-description="Di kota yang tak pernah tidur, dua sahabat menemukan bahwa masa depan mereka telah ditulis di tempat yang paling sulit untuk dijangkau.">
+              <img src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=80" alt="Nowhere City" />
+              <div class="film-title">Nowhere City</div>
+            </article>
+            <article class="film-card" data-title="Velvet Echo" data-year="2025" data-tag="Mystery" data-duration="1h 39m" data-image="https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=900&q=80" data-description="Sebuah gudang musik lama menyimpan suara yang dapat mengembalikan kenangan masa lalu yang terlupakan.">
+              <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=900&q=80" alt="Velvet Echo" />
+              <div class="film-title">Velvet Echo</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" aria-label="Film aksi">
+          <div class="section-header">
+            <h2>Action</h2>
+            <span class="explore">Lihat Semua</span>
+          </div>
+          <div class="film-grid">
+            <article class="film-card" data-title="Steel Dawn" data-year="2026" data-tag="Action" data-duration="2h 04m" data-image="https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80" data-description="Ketika kota mulai runtuh, satu orang dengan kekuatan luar biasa harus melindungi rakyatnya sebelum semua terlambat.">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80" alt="Steel Dawn" />
+              <div class="film-title">Steel Dawn</div>
+            </article>
+            <article class="film-card" data-title="Last Signal" data-year="2024" data-tag="Sci-Fi" data-duration="1h 49m" data-image="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80" data-description="Seorang pilot luar angkasa menerima sinyal terakhir dari dunia yang telah hilang dan harus memilih untuk percaya atau mengabaikannya.">
+              <img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80" alt="Last Signal" />
+              <div class="film-title">Last Signal</div>
+            </article>
+            <article class="film-card" data-title="Ghost Line" data-year="2025" data-tag="Mystery" data-duration="2h 01m" data-image="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80" data-description="Penyelewengan di jalur kereta bawah tanah mengungkap kebenaran yang lebih besar daripada yang dibayangkan semua orang.">
+              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80" alt="Ghost Line" />
+              <div class="film-title">Ghost Line</div>
+            </article>
+            <article class="film-card" data-title="The Core" data-year="2023" data-tag="Adventure" data-duration="1h 58m" data-image="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" data-description="Sebuah ekspedisi memotong lapisan tanah paling dalam untuk menemukan pusat bumi dan sesuatu yang belum pernah dilihat manusia.">
+              <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="The Core" />
+              <div class="film-title">The Core</div>
+            </article>
+            <article class="film-card" data-title="Eclipse Run" data-year="2026" data-tag="Action" data-duration="1h 43m" data-image="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80" data-description="Dalam perlombaan menuju titik gelap, setiap detik menjadi penting untuk menghindari kejaran raksasa teknologi.">
+              <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80" alt="Eclipse Run" />
+              <div class="film-title">Eclipse Run</div>
+            </article>
+            <article class="film-card" data-title="Blue Vortex" data-year="2025" data-tag="Drama" data-duration="2h 10m" data-image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80" data-description="Sebuah kisah tentang kebebasan, luka, dan keputusan yang membentuk seseorang menjadi sosok baru.">
+              <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80" alt="Blue Vortex" />
+              <div class="film-title">Blue Vortex</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" aria-label="Film drama">
+          <div class="section-header">
+            <h2>Drama</h2>
+            <span class="explore">Lihat Semua</span>
+          </div>
+          <div class="film-grid">
+            <article class="film-card" data-title="Second Chance" data-year="2025" data-tag="Drama" data-duration="1h 51m" data-image="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80" data-description="Seorang pengusaha yang gagal kembali ke masa lalu, hanya untuk melihat bahwa semua pilihan dapat berubah dalam sekejap.">
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80" alt="Second Chance" />
+              <div class="film-title">Second Chance</div>
+            </article>
+            <article class="film-card" data-title="Heat of Memory" data-year="2024" data-tag="Romance" data-duration="1h 46m" data-image="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80" data-description="Di antara badai dan udara panas, dua jiwa yang terpisah menemukan jejak yang sama dalam perjalanan hidup.">
+              <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80" alt="Heat of Memory" />
+              <div class="film-title">Heat of Memory</div>
+            </article>
+            <article class="film-card" data-title="Golden Hour" data-year="2026" data-tag="Drama" data-duration="2h 08m" data-image="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80" data-description="Sebuah keluarga kecil mencoba memulihkan rumah lama mereka sambil menunggu waktu yang tepat untuk melangkah maju.">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80" alt="Golden Hour" />
+              <div class="film-title">Golden Hour</div>
+            </article>
+            <article class="film-card" data-title="Wild Avenue" data-year="2023" data-tag="Coming of Age" data-duration="1h 40m" data-image="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80" data-description="Seorang pemuda yang tak tahu arah hidupnya menemukan makna baru saat mengembara di jalan yang penuh misteri.">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80" alt="Wild Avenue" />
+              <div class="film-title">Wild Avenue</div>
+            </article>
+            <article class="film-card" data-title="Paper Stars" data-year="2025" data-tag="Drama" data-duration="1h 38m" data-image="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80" data-description="Ketika mimpi dibawa oleh angin, seorang seniman muda memilih jujur pada dirinya sendiri dan dunia yang mengubahnya.">
+              <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80" alt="Paper Stars" />
+              <div class="film-title">Paper Stars</div>
+            </article>
+            <article class="film-card" data-title="Silent Bloom" data-year="2025" data-tag="Drama" data-duration="1h 57m" data-image="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&q=80" data-description="Di musim dingin yang panjang, dua orang yang saling menutup diri menemukan suara baru untuk menciptakan harapan.">
+              <img src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&q=80" alt="Silent Bloom" />
+              <div class="film-title">Silent Bloom</div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      © 2026 CinemaVerse — Semua hak dilindungi.
+    </footer>
+
+    <div class="modal" id="movieModal" aria-modal="true" role="dialog">
+      <div class="modal-panel">
+        <button class="close-btn" aria-label="Tutup">×</button>
+        <div class="modal-image" id="modalImage"></div>
+        <div class="modal-body">
+          <span class="movie-tag" id="movieTag">Action</span>
+          <div class="movie-header">
+            <h3 id="movieTitle">Judul Film</h3>
+            <div class="meta-badges">
+              <span id="movieYear">2026</span>
+              <span>•</span>
+              <span id="movieDuration">2h 10m</span>
+            </div>
+          </div>
+          <div class="movie-desc" id="movieDescription">
+            Deskripsi film akan muncul di sini.
+          </div>
+          <div class="detail-actions">
+            <a class="btn btn-primary" id="detailLink" href="detail.html?film=crimson-horizon">▶ Lihat Detail</a>
+            <button class="btn btn-secondary" type="button">＋ Daftar Saya</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function getWatchlist() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('cinemaverse_watchlist') || '[]');
+          return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function setWatchlist(items) {
+        localStorage.setItem('cinemaverse_watchlist', JSON.stringify(items));
+      }
+
+      function toggleWatchlist(title) {
+        const list = getWatchlist();
+        const filtered = list.filter((item) => item.title !== title);
+        const isAdded = filtered.length === list.length;
+
+        if (isAdded) {
+          list.push({ title, addedAt: new Date().toISOString() });
+          setWatchlist(list);
+          return 'added';
+        }
+
+        setWatchlist(filtered);
+        return 'removed';
+      }
+
+      document.querySelectorAll('.watchlist-toggle').forEach((button) => {
+        const title = button.dataset.title || 'Film';
+        const current = getWatchlist().some((item) => item.title === title);
+        button.textContent = current ? '✓ Tersimpan' : '＋ Daftar Saya';
+        button.addEventListener('click', () => {
+          const result = toggleWatchlist(title);
+          const active = getWatchlist().some((item) => item.title === title);
+          button.textContent = active ? '✓ Tersimpan' : '＋ Daftar Saya';
+          button.style.background = active ? 'rgba(70, 211, 105, 0.18)' : 'rgba(255, 255, 255, 0.12)';
+          button.style.borderColor = active ? 'rgba(70, 211, 105, 0.7)' : 'rgba(255,255,255,0.18)';
+          button.style.color = '#fff';
+          if (result === 'added') {
+            button.textContent = '✓ Tersimpan';
+          } else {
+            button.textContent = '＋ Daftar Saya';
+          }
+        });
+      });
+
+      const accountToggle = document.getElementById('accountToggle');
+      const accountPanel = document.getElementById('accountPanel');
+      const authLink = document.getElementById('authLink');
+      const accountName = document.querySelector('.account-name');
+      const accountSub = document.querySelector('.account-sub');
+      const accountAvatar = document.querySelector('.account-avatar');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      function syncUserState() {
+        const savedUser = JSON.parse(localStorage.getItem('cinemaverse_user') || '{}');
+        const loggedIn = localStorage.getItem('cinemaverse_logged_in') === 'true';
+        const name = savedUser.name || 'Nadya';
+        const initial = name.charAt(0).toUpperCase() || 'N';
+
+        if (accountName) accountName.textContent = name;
+        if (accountSub) accountSub.textContent = 'Premium • 4K Ultra HD';
+        if (accountAvatar) accountAvatar.textContent = initial;
+        if (accountToggle) accountToggle.textContent = initial;
+
+        if (loggedIn) {
+          if (authLink) authLink.style.display = 'none';
+          if (accountToggle) accountToggle.style.display = 'grid';
+        } else {
+          if (authLink) authLink.style.display = 'inline-flex';
+          if (accountToggle) accountToggle.style.display = 'none';
+        }
+      }
+
+      if (accountToggle && accountPanel) {
+        accountToggle.addEventListener('click', (event) => {
+          event.stopPropagation();
+          accountPanel.hidden = !accountPanel.hidden;
+        });
+
+        document.addEventListener('click', (event) => {
+          const clickInside = accountPanel.contains(event.target) || accountToggle.contains(event.target);
+          if (!clickInside) {
+            accountPanel.hidden = true;
+          }
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('cinemaverse_logged_in');
+          localStorage.removeItem('cinemaverse_user');
+          accountPanel.hidden = true;
+          syncUserState();
+          window.location.href = 'login.html';
+        });
+      }
+
+      syncUserState();
+
+      const modal = document.getElementById('movieModal');
+      const closeBtn = document.querySelector('.close-btn');
+      const movieCards = document.querySelectorAll('.film-card');
+      const interactiveCards = document.querySelectorAll('.film-card, .release-card, .mini-card, .rank-card');
+
+      const movieTitle = document.getElementById('movieTitle');
+      const movieTag = document.getElementById('movieTag');
+      const movieYear = document.getElementById('movieYear');
+      const movieDuration = document.getElementById('movieDuration');
+      const movieDescription = document.getElementById('movieDescription');
+      const modalImage = document.getElementById('modalImage');
+      const detailLink = document.getElementById('detailLink');
+
+      const defaultTrailer = 'ScMzIvxBSi4';
+
+      function openMovieModal(card) {
+        const title = card.dataset.title || card.querySelector('.mini-label, .film-title, .rank-label, .release-title')?.textContent?.trim() || 'Judul Film';
+        const tag = card.dataset.tag || card.dataset.genre || 'Action';
+        const year = card.dataset.year || '2026';
+        const duration = card.dataset.duration || '2h 10m';
+        const description = card.dataset.description || 'Deskripsi film akan muncul di sini.';
+        const trailer = card.dataset.trailer || defaultTrailer;
+        const image = card.dataset.image || card.querySelector('img')?.src || '';
+        const slug = (card.dataset.slug || title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'film');
+
+        movieTitle.textContent = title;
+        movieTag.textContent = tag;
+        movieYear.textContent = year;
+        movieDuration.textContent = duration;
+        movieDescription.textContent = description;
+        detailLink.href = `detail.html?film=${slug}`;
+
+        modalImage.innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer}?autoplay=1&mute=1&rel=0" title="${title}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+
+        if (image) {
+          modalImage.style.backgroundImage = `url('${image}')`;
+          modalImage.style.backgroundSize = 'cover';
+          modalImage.style.backgroundPosition = 'center';
+        } else {
+          modalImage.style.backgroundImage = 'none';
+        }
+
+        modal.classList.add('show');
+      }
+
+      movieCards.forEach((card) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'card-overlay';
+        overlay.innerHTML = '<span class="preview-badge">▶</span><span class="preview-text">Preview</span>';
+        card.appendChild(overlay);
+
+        card.addEventListener('mouseenter', () => card.classList.add('previewing'));
+        card.addEventListener('mouseleave', () => card.classList.remove('previewing'));
+      });
+
+      interactiveCards.forEach((card) => {
+        card.addEventListener('click', () => openMovieModal(card));
+      });
+
+      function closeModal() {
+        modal.classList.remove('show');
+        modalImage.innerHTML = '';
+      }
+
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeModal();
+        }
+      });
+
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dots = Array.from(document.querySelectorAll('.dot'));
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const top10Row = document.getElementById('top10Row');
+      const filterChips = document.querySelectorAll('.filter-chip');
+      const allCards = document.querySelectorAll('.film-card');
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        currentSlide = (index + slides.length) % slides.length;
+        slides.forEach((slide, i) => slide.classList.toggle('active', i === currentSlide));
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+      }
+
+      prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+      nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+
+      dots.forEach((dot) => {
+        dot.addEventListener('click', () => showSlide(Number(dot.dataset.slide)));
+      });
+
+      filterChips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const filter = chip.dataset.filter;
+          filterChips.forEach((item) => item.classList.toggle('active', item === chip));
+
+          allCards.forEach((card) => {
+            const tag = (card.dataset.tag || '').toLowerCase();
+            const shouldShow = filter === 'all' || tag.includes(filter);
+            card.style.display = shouldShow ? '' : 'none';
+          });
+        });
+      });
+
+      if (top10Row) {
+        top10Row.addEventListener('wheel', (event) => {
+          if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+            event.preventDefault();
+            top10Row.scrollLeft += event.deltaY;
+          }
+        }, { passive: false });
+      }
+
+      setInterval(() => showSlide(currentSlide + 1), 5000);
+    </script>
+  </body>
+</html>

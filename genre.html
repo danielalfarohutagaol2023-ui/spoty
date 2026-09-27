@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genre | CinemaVerse</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --bg-2: #131319;
+        --panel: rgba(18,18,24,0.9);
+        --white: #f5f5f5;
+        --muted: #b8b8bf;
+        --line: rgba(255,255,255,0.08);
+        --red: #e50914;
+        --red-2: #b20710;
+        --good: #46d369;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, rgba(229,9,20,0.12), transparent 22%), var(--bg);
+        color: var(--white);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      a { color: inherit; text-decoration: none; }
+      img { display: block; max-width: 100%; }
+      button { font: inherit; }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(11,11,15,0.9);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+      }
+      .container { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+      .topbar-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 0;
+      }
+      .brand {
+        color: var(--red);
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+      .nav {
+        display: flex;
+        gap: 22px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .nav a:hover { color: var(--white); }
+
+      .page { padding: 28px 0 80px; }
+      .hero {
+        margin-bottom: 28px;
+        padding: 28px 24px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: linear-gradient(135deg, rgba(229,9,20,0.16), rgba(255,255,255,0.02));
+      }
+      .hero h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2.2rem, 4vw, 3.5rem);
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .genre-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 18px;
+      }
+      .genre-card {
+        position: relative;
+        overflow: hidden;
+        min-height: 210px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        box-shadow: 0 18px 38px rgba(0,0,0,0.25);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .genre-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(229,9,20,0.5);
+      }
+      .genre-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.82;
+      }
+      .genre-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.8));
+      }
+      .genre-content {
+        position: absolute;
+        inset: auto 0 0 0;
+        z-index: 1;
+        padding: 18px;
+      }
+      .genre-content strong {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+      }
+      .genre-content span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .section {
+        margin-top: 34px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+      .section-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+      .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .chip {
+        padding: 10px 15px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .chip.active {
+        background: var(--red);
+        color: var(--white);
+        border-color: var(--red);
+      }
+
+      .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(180px, 1fr));
+        gap: 18px;
+      }
+      .movie-card {
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        transition: transform 0.2s ease;
+      }
+      .movie-card:hover { transform: translateY(-4px); }
+      .movie-card img {
+        width: 100%;
+        height: 260px;
+        object-fit: cover;
+      }
+      .movie-card .body {
+        padding: 12px;
+      }
+      .movie-card h3 {
+        margin: 0 0 6px;
+        font-size: 1rem;
+      }
+      .movie-card span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 980px) {
+        .nav { display: none; }
+        .genre-grid { grid-template-columns: repeat(2, minmax(200px, 1fr)); }
+        .movie-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+      }
+      @media (max-width: 640px) {
+        .genre-grid, .movie-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+        .brand { font-size: 1.5rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="index.html" class="brand">NETFLIX</a>
+        <nav class="nav" aria-label="Navigasi utama">
+          <a href="index.html">Beranda</a>
+          <a href="movies.html">Film</a>
+          <a href="series.html">Series</a>
+          <a href="genre.html">Genre</a>
+          <a href="watchlist.html">Watchlist</a>
+          <a href="search.html">Search</a>
+          <a href="profile.html">Profil</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container">
+        <section class="hero">
+          <h1>Genre</h1>
+          <p>Jelajahi film dan serial berdasarkan mood, alur, dan pengalaman tontonan yang Anda sukai.</p>
+        </section>
+
+        <section class="genre-grid">
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=900&q=80" alt="Action" />
+            <div class="genre-content">
+              <strong>Action</strong>
+              <span>38 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=900&q=80" alt="Drama" />
+            <div class="genre-content">
+              <strong>Drama</strong>
+              <span>42 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80" alt="Sci-Fi" />
+            <div class="genre-content">
+              <strong>Sci-Fi</strong>
+              <span>26 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80" alt="Adventure" />
+            <div class="genre-content">
+              <strong>Adventure</strong>
+              <span>29 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" alt="Thriller" />
+            <div class="genre-content">
+              <strong>Thriller</strong>
+              <span>31 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&q=80" alt="Romance" />
+            <div class="genre-content">
+              <strong>Romance</strong>
+              <span>18 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="Horror" />
+            <div class="genre-content">
+              <strong>Horror</strong>
+              <span>20 titles</span>
+            </div>
+          </article>
+          <article class="genre-card">
+            <img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80" alt="Animation" />
+            <div class="genre-content">
+              <strong>Animation</strong>
+              <span>24 titles</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2>Trending di genre Action</h2>
+            <div class="filters">
+              <button class="chip active" type="button">Popular</button>
+              <button class="chip" type="button">Latest</button>
+              <button class="chip" type="button">Top Rated</button>
+            </div>
+          </div>
+
+          <div class="movie-grid">
+            <article class="movie-card">
+              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80" alt="Midnight Run" />
+              <div class="body">
+                <h3>Midnight Run</h3>
+                <span>Action • 2026</span>
+              </div>
+            </article>
+            <article class="movie-card">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80" alt="Steel Dawn" />
+              <div class="body">
+                <h3>Steel Dawn</h3>
+                <span>Action • 2026</span>
+              </div>
+            </article>
+            <article class="movie-card">
+              <img src="https://images.unsplash.com/photo-1524989941526-4a35bbd4b2c8?auto=format&fit=crop&w=900&q=80" alt="Iron Breaker" />
+              <div class="body">
+                <h3>Iron Breaker</h3>
+                <span>Action • 2025</span>
+              </div>
+            </article>
+            <article class="movie-card">
+              <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=80" alt="Eclipse Run" />
+              <div class="body">
+                <h3>Eclipse Run</h3>
+                <span>Action • 2026</span>
+              </div>
+            </article>
+            <article class="movie-card">
+              <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="The Core" />
+              <div class="body">
+                <h3>The Core</h3>
+                <span>Adventure • 2023</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
